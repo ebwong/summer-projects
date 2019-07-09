@@ -1,0 +1,21 @@
+# Derived from
+# https://github.com/bibinwilson/jenkins-docker-slave/blob/master/Dockerfile
+FROM ubuntu:18.04
+
+RUN apt-get apt-get update && \
+    apt-get install -qy openssh-server
+
+RUN apt-get install -qy openssh-server && \
+    sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd && \
+    mkdir -p /var/run/sshd
+
+RUN adduser --quiet jenkins && \
+    echo "jenkins:jenkins" | chpasswd
+
+RUN mkdir -p /home/jenkins/.ssh && \
+    touch /home/jenkins/.ssh/authorized_keys
+
+RUN chown -R jenkins:jenkins /home/jenkins/.ssh/
+
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
