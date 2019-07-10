@@ -22,11 +22,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test_fibonacci_pytest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="68">
-              <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
-              <folding>
-                <element signature="e#44#77#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="85">
+              <caret line="5" column="15" lean-forward="true" selection-start-line="5" selection-start-column="15" selection-end-line="5" selection-end-column="15" />
             </state>
           </provider>
         </entry>
@@ -48,23 +45,33 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="85" />
-    <option name="y" value="25" />
-    <option name="width" value="1750" />
-    <option name="height" value="980" />
+  <component name="ProjectFrameBounds" extendedState="7">
+    <option name="x" value="952" />
+    <option name="width" value="977" />
+    <option name="height" value="1038" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="python-docker-demo" type="b2602c69:ProjectViewProjectNode" />
+              <item name="python-docker-demo" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
       <pane id="Scope" />
-      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -78,7 +85,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python tests.pytest in test_fibonacci_pytest.py">
+  <component name="RunManager" selected="Python.test_fibonacci_pytest">
     <configuration name="test_fibonacci_pytest" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="docker-demo" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -162,8 +169,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.pytest in test_fibonacci_pytest.py" />
         <item itemvalue="Python.test_fibonacci_pytest" />
+        <item itemvalue="Python tests.pytest in test_fibonacci_pytest.py" />
         <item itemvalue="Python tests.pytest for test_fibonacci_pytest.test_invalid_int_arg" />
         <item itemvalue="Python tests.pytest for test_fibonacci_pytest.test_compute_large_fib" />
         <item itemvalue="Python tests.pytest for test_fibonacci_pytest.test_compute_small_fib" />
@@ -202,17 +209,29 @@
     <history-entry file="pytest_in_test_fibonacci_pytest_py - 2019.07.06 at 15h 08m 54s.xml">
       <configuration name="pytest in test_fibonacci_pytest.py" configurationId="tests" />
     </history-entry>
+    <history-entry file="pytest_in_test_fibonacci_pytest_py - 2019.07.10 at 12h 19m 47s.xml">
+      <configuration name="pytest in test_fibonacci_pytest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="pytest_in_test_fibonacci_pytest_py - 2019.07.10 at 12h 55m 40s.xml">
+      <configuration name="pytest in test_fibonacci_pytest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="pytest_in_test_fibonacci_pytest_py - 2019.07.10 at 13h 04m 48s.xml">
+      <configuration name="pytest in test_fibonacci_pytest.py" configurationId="tests" />
+    </history-entry>
+    <history-entry file="pytest_in_test_fibonacci_pytest_py - 2019.07.10 at 13h 06m 31s.xml">
+      <configuration name="pytest in test_fibonacci_pytest.py" configurationId="tests" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.22523117" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.1003963" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.53323907" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.5261669" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -247,11 +266,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test_fibonacci_pytest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="68">
-          <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
-          <folding>
-            <element signature="e#44#77#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="85">
+          <caret line="5" column="15" lean-forward="true" selection-start-line="5" selection-start-column="15" selection-end-line="5" selection-end-column="15" />
         </state>
       </provider>
     </entry>
