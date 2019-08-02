@@ -2,11 +2,13 @@
 Queries 2014 ASE data
 """
 import requests
-import matplotlib
+
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from cycler import cycler
 
 def get_census_var_string(census_vars):
     """
@@ -62,27 +64,6 @@ def dataframe_from_census(census_data, columns_to_drop=None):
 
 
 
-def format_owner_data_for_graphing(census_data):
-    x_var = [elem for elem in census_data["YIBSZFI_TTL"]]
-    y_var = [int(elem, 10) for elem in census_data["OWNPDEMP"]]
-    return [x_var, y_var]
-
-
-def plot_owner_data(data):
-    x_var_index = 0
-    y_var_index = 1
-    x_label = "Years in business"
-    y_label = "Number of business owners"
-    x_spacing = np.arange(len(data[x_var_index]))
-    plt.bar(x_spacing, data[y_var_index])
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-
-    plt.xticks(x_spacing, data[y_var_index], fontsize=5, rotation=30)
-
-    plt.title(f"{x_label} vs {y_label}")
-    plt.show()
-
 
 def get_owner_data():
     """
@@ -102,12 +83,17 @@ def get_business_data():
     """
 
     business_url = "https://api.census.gov/data/2014/ase/cscb"
-    business_vars = ("ASECB", "ASECB_TTL", "EMP", "PAYANN", "YIBSZFI")
+    business_vars = ["ASECB", "ASECB_TTL", "EMP", "PAYANN", "YIBSZFI", "YIBSZFI_TTL"]
     api_key = "5fff67c7b4559d14fc4adc2da294f674e95c1a3e"
 
     return query_census(business_url, business_vars, api_key)
 
 def simplify_business_df(df_bus):
+    """
+    Makes the DataFrame easier to read
+    :param df_bus:
+    :return:
+    """
     # Formatting business data
     df_bus = df_bus.rename(columns={"ASECB": "RACE"})
     # Make codes uniform
@@ -139,71 +125,220 @@ def simplify_business_df(df_bus):
     ]
     df_bus = df_bus[np.logical_not(df_bus["RACE"].isin(bus_codes_to_remove))]
 
+    return df_bus
+
+def add_columns_to_business_df(df):
+    """
+    Inserts additional columns into the DataFrame
+    :param df:
+    :return:
+    """
+    pay_per_emp = df["PAYANN"] / df["EMP"]
+    df = df.assign(PAYPEREMP=pay_per_emp)
+    return df
+
+def convert_categorical_data_to_numerical_data(df):
+    # A mapping of the categorical codes to replace for YIBSZFI
+    categories_to_replace = {
+        # Use the mean for a range?
+        "001": "DROP",
+        "311": 1, # < 2 years
+        "318": 3, # 2-3 years
+        "319": 5, # 4-5 years
+        "321": 10, # 6-10 years
+        "322": 15, # 11-15 years
+        "323": 16 # > 16 years
+    }
+
+    # Categorical version
+    categories_to_replace = {
+        # Use the mean for a range?
+        "001": "DROP",
+        "311": "<2 years",  # < 2 years
+        "318": "2-3 years",  # 2-3 years
+        "319": "4-5 years",  # 4-5 years
+        "321": "6-10 years",  # 6-10 years
+        "322": "11-15 years",  # 11-15 years
+        "323": ">16 years"  # > 16 years
+    }
+
+    df = df.replace(categories_to_replace)
+    df = df[df["YIBSZFI"] != "DROP"] # Drop rows where the YIBSZFI is All
+
+    # df = df[df["YIBSZFI"] != "001"] # Drop rows where the YIBSZFI is All
+
+    return df
+
+
+def format_owner_data_for_graphing(census_data):
+    x_var = [elem for elem in census_data["YIBSZFI_TTL"]]
+    y_var = [int(elem, 10) for elem in census_data["OWNPDEMP"]]
+    return [x_var, y_var]
+
+
+def plot_owner_data(data):
+    x_var_index = 0
+    y_var_index = 1
+    x_label = "Years in business"
+    y_label = "Number of business owners"
+    x_spacing = np.arange(len(data[x_var_index]))
+    plt.bar(x_spacing, data[y_var_index])
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+
+    plt.xticks(x_spacing, data[y_var_index], fontsize=5, rotation=30)
+
+    plt.title(f"{x_label} vs {y_label}")
+    plt.show()
+
+def plot_business_data(xvar, yvar, df):
+
+    marker = "."
+    fig = plt.figure()
+    ax = plt.axes()
+    colors = [
+        "r",
+        "#FFA500", # Orange
+        "y",
+        "g",
+        "b",
+        "#4B0082", # indigo
+        "#EE82EE", # violet
+        "c", # cyan
+        "m", # magenta
+        "#FFD700", # gold
+        "#00BFFF", # deep sky blue
+        "#000080", # navy
+        "#FF1493", # deep pink
+        "#FFC0CB", # pink
+        "#8B4513", # saddle brown
+        "#D2691E", # chocolate
+        "#708090", # slate gray
+        "#800080", # purple
+        "#00FF00", # lime
+        "#FA8072", # salmon
+        "#DC143C", # crimson
+    ]
+    my_cycle = cycler(color=colors)
+    ax.set_prop_cycle(my_cycle)
+
+    # Get a list of all of the demographic categories
+    demographic_categories = df["ASECB_TTL"].unique()
+
+    for category in demographic_categories:
+        # Get a DataFrame that belongs to this category
+        cat_df = df[df["ASECB_TTL"] == category]
+        # Plot this category's data
+        ax.plot(cat_df[xvar].values, cat_df[yvar].values, marker, label=category)
+
+    ax.legend(loc="lower right", prop={"size": 6})
+    ax.set_xlabel(xvar)
+    ax.set_ylabel(yvar)
+    ax.set_title(f"{yvar} vs {xvar}")
+
+    plt.show()
+
+
+
+def print_owner_data():
+    """
+    For testing: fetches the Business Owner data
+    :return:
+    """
+    owner_data = get_owner_data()
+    owner_cols = ["us", "USBORNCIT"]
+    df_own = dataframe_from_census(owner_data, owner_cols)
+    df_own = df_own.rename(columns={"ASECBO": "RACE"})
+    # Collapse rows with same race code
+
+    print(df_own)
+
+def print_business_data(xvar, yvar):
+    """
+    For testing: fetches the Business Data
+    :return:
+    """
+
+    bus_data = get_business_data()
+    bus_cols = ["us"] # Drop these columns
+    df_bus = dataframe_from_census(bus_data, bus_cols)
+
     # Make sure numeric data are treated as numbers
     df_bus = df_bus.astype({"EMP": np.int64, "PAYANN": np.int64})
 
+    df_bus = convert_categorical_data_to_numerical_data(df_bus)
+    df_bus = add_columns_to_business_df(df_bus)
+
+    # Make sure numeric data are treated as numbers
+    # df_bus = df_bus.astype({"YIBSZFI": np.int64})
+
+    # export_dataframe_to_excel(df_bus)
+    # export_dataframe_to_csv(df_bus)
+
+    plot_business_data(xvar, yvar, df_bus)
+
+
     return df_bus
 
-def add_columns_to_business_df(df_bus):
-    pay_per_emp = df_bus["PAYANN"] // df_bus["EMP"]
 
+def export_dataframe_to_csv(df):
+    csv_path = "C:\\Users\\Andrew\\PycharmProjects\\census-ase\\business-data.csv"
+    df.to_csv(path_or_buf=csv_path)
 
-    df_bus = df_bus.assign(PAYPEREMP= pay_per_emp)
-    return df_bus
+def export_dataframe_to_excel(df):
+    excel_path = "C:\\Users\\Andrew\\PycharmProjects\\census-ase\\business-data.xlsx"
+    sheet_name = "Census Business Data"
+    df.to_excel(excel_path, sheet_name=sheet_name)
+
+def prompt_user():
+    welcome_msg = "Welcome to a tool for investigating data from the 2014 " \
+                  "ASE. Choose two different variables from the list below(" \
+                  "Type the code in all-caps):"
+
+    print(welcome_msg)
+
+    var_options_msg = "Number of employees: EMP\n" \
+                      "Annual payroll: PAYANN\n" "" \
+                      "Payroll per employee: PAYPEREMP\n" \
+                      "Years in business: YIBSZFI\n"
+
+    var_options = ["EMP", "PAYANN", "PAYPEREMP", "YIBSZFI"]
+    print(var_options_msg)
+
+    xvar = None
+    yvar = None
+    xvar_prompt = "Choose 1 variable to plot on the x-axis:"
+    yvar_prompt = "Choose 1 variable to plot on the y-axis"
+    var_err_msg_str = " is not a valid variable."
+
+    while True:
+        print(xvar_prompt)
+        xvar = input()
+        if xvar not in var_options:
+            print(f"{xvar}" + var_err_msg_str)
+            xvar = None
+            yvar = None
+            continue
+        print(yvar_prompt)
+        yvar = input()
+        if yvar not in var_options:
+            print(f"{yvar}" + var_err_msg_str)
+            xvar = None
+            yvar = None
+            continue
+        break
+
+    return xvar, yvar
+
 
 def main():
-    owner = False
-    if owner:
-        owner_data = get_owner_data()
-        owner_cols = ["us", "USBORNCIT"]
-        df_own = dataframe_from_census(owner_data, owner_cols)
-        df_own = df_own.rename(columns={"ASECBO": "RACE"})
-        # Collapse rows with same race code
-
-
-        print(df_own)
-
-    bus = True
-    if bus:
-        bus_data = get_business_data()
-        bus_cols = ["us"]
-        df_bus = dataframe_from_census(bus_data, bus_cols)
-        df_bus = simplify_business_df(df_bus)
-        df_bus = add_columns_to_business_df(df_bus)
-
-
-        print(df_bus)
-
-        # print(df_bus.to_csv())
-
-
-
-
+    """
+    Driver function for testing
+    :return:
+    """
+    xvar, yvar = prompt_user()
+    print_business_data(xvar, yvar)
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-run_tests = False
-if run_tests:
-    data = dataframe_from_census(get_owner_data())
-    filtered_data = data.query(" HRSWRKD == 'CZ' ")
-    plot_owner_data(format_owner_data_for_graphing(filtered_data))
-
-output_to_file = False
-if output_to_file:
-    output = dataframe_from_census(get_owner_data())
-    file = open(".\output.txt", mode="w+")
-    file.write(str(output))
-    file.close()
-
-
-
-
