@@ -1,6 +1,8 @@
 """
 Main module for querying 2014 ASE data and 2012 Survey of Business Owners
 """
+import os
+
 import requests
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -43,7 +45,7 @@ def get_business_data(year=2014):
         # Shorten
         business_vars = ["CBGROUP", "CBGROUP_TTL", "EMP", "PAYANN"]
 
-    api_key = "5fff67c7b4559d14fc4adc2da294f674e95c1a3e"
+    api_key = os.environ["CENSUS_KEY"]
     return query_census(business_url, business_vars, api_key)
 
 
@@ -131,7 +133,7 @@ def add_columns_to_business_df(df):
     return df
 
 
-def main():
+def get_census_data():
     path_2014 = "C:\\Users\\Andrew\\PycharmProjects\\census-ase\\business-2014.xlsx"
     path_2012 = "C:\\Users\\Andrew\\PycharmProjects\\census-ase\\business-2012.xlsx"
     multi_sheet_path = "C:\\Users\\Andrew\\PycharmProjects\\census-ase\\characteristics-of-businesses.xlsx"
@@ -155,19 +157,22 @@ def main():
     # Exporting data
     dataframes_and_sheets = [(bus_2012_df, sheet_name_2012),
                              (bus_2014_df, sheet_name_2014)]
-    export_dataframes_to_excel(multi_sheet_path, dataframes_and_sheets)
+    # export_dataframes_to_excel(multi_sheet_path, dataframes_and_sheets)
 
     # Combining data
     suffixes = ("_2014", "_2012")
     merged_df = bus_2014_df.merge(bus_2012_df, on="GROUP", suffixes=suffixes)
-    merged_df.to_excel(combined_path)
+    # merged_df.to_excel(combined_path)
 
     xvar_2012 = "GROUP"
     yvar_2012 = "PAYPEREMP_2012"
-    plot_business_data(xvar_2012, yvar_2012, merged_df)
+    path = plot_business_data(xvar_2012, yvar_2012, merged_df)
+    return path
 
 
 
 
 if __name__ == "__main__":
-    main()
+    get_census_data()
+
+

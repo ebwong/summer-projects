@@ -9,8 +9,8 @@ from cycler import cycler
 def plot_business_data(xvar, yvar, df):
 
     demographic_category_key = "GROUP"
-    xlabel = "Group"
-    ylabel= "Pay per employee"
+    xlabel = xvar
+    ylabel= yvar
 
     marker = "."
     fig = plt.figure()
@@ -63,6 +63,10 @@ def plot_business_data(xvar, yvar, df):
     ax.legend(loc="lower right", prop={"size": 6})
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    ax.set_title(f"{ylabel} vs {xlabel}")
+    ax.set_title(f"{xlabel} vs {ylabel}")
 
-    plt.show()
+    # plt.show()
+
+    save_path = "C:\\Users\\Andrew\\Desktop\\census_web_img.png"
+    plt.savefig(save_path)
+    return save_path
