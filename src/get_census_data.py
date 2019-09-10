@@ -166,6 +166,7 @@ def get_census_data():
 
     xvar_2012 = "GROUP"
     yvar_2012 = "PAYPEREMP_2012"
+    # Used for saving a path to the image of the data
     path = plot_business_data(xvar_2012, yvar_2012, merged_df)
     return path
 
