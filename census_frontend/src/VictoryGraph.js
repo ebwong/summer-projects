@@ -10,11 +10,11 @@ const data = [
 ];
 
 
-class Main extends React.Component {
+class CensusGraph extends React.Component {
     render() {
         return (
             <div>
-                 <h1>Victory Tutorial</h1>
+                 <h1>Census Data</h1>
                 <VictoryChart
                     domainPadding={10}
                 >
@@ -40,4 +40,4 @@ class Main extends React.Component {
     }
 }
 
-export default Main
+export default CensusGraph

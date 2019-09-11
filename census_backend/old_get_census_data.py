@@ -12,16 +12,16 @@ import pandas as pd
 from cycler import cycler
 
 # Data exporting modules
-from src.census_data_export import export_dataframes_to_excel
-from src.census_data_export import export_dataframe_to_csv
+from census_backend.census_data_export import export_dataframes_to_excel
+from census_backend.census_data_export import export_dataframe_to_csv
 
 # Data formatting modules
-from src.census_data_formatting import get_columns_to_rename
-from src.census_data_formatting import get_columns_to_drop
-from src.census_data_formatting import convert_categorical_data_to_numerical_data
+from census_backend.census_data_formatting import get_columns_to_rename
+from census_backend.census_data_formatting import get_columns_to_drop
+from census_backend.census_data_formatting import convert_categorical_data_to_numerical_data
 
 # Data visualization modules
-from src.census_data_plotting import plot_business_data
+from census_backend.census_data_plotting import plot_business_data
 
 
 def get_business_data(year=2014):
@@ -134,7 +134,7 @@ def add_columns_to_business_df(df):
     return df
 
 
-def get_census_data():
+def old_get_census_data():
     path_2014 = "C:\\Users\\Andrew\\PycharmProjects\\census-ase\\business-2014.xlsx"
     path_2012 = "C:\\Users\\Andrew\\PycharmProjects\\census-ase\\business-2012.xlsx"
     multi_sheet_path = "C:\\Users\\Andrew\\PycharmProjects\\census-ase\\characteristics-of-businesses.xlsx"
@@ -174,8 +174,7 @@ def get_census_data():
 
 
 
-
 if __name__ == "__main__":
-    get_census_data()
+    old_get_census_data()
 
 
