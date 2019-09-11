@@ -1,13 +1,13 @@
 import React from 'react';
-import Intro from './Intro';
-import DataSelection from './DataSelection';
+import TitleAndLinks from './TitleAndLinks';
+import Options from './Options';
 
 class App extends React.Component {
 	render() {
 		return (
 			<div>
-			<Intro />
-			<DataSelection />
+			<TitleAndLinks />
+			<Options />
 			</div>
 		);
 	}

@@ -2,6 +2,7 @@
 Main module for querying 2014 ASE data and 2012 Survey of Business Owners
 """
 import os
+import json
 
 import requests
 import matplotlib as mpl
@@ -167,8 +168,9 @@ def get_census_data():
     xvar_2012 = "GROUP"
     yvar_2012 = "PAYPEREMP_2012"
     # Used for saving a path to the image of the data
-    path = plot_business_data(xvar_2012, yvar_2012, merged_df)
-    return path
+    # path = plot_business_data(xvar_2012, yvar_2012, merged_df)
+    # return path
+    return json.dumps(merged_df)
 
 
 
