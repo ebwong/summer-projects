@@ -14,6 +14,7 @@ VALID_YEARS = [
 ]
 EMP = "EMP"  # Employee count
 PAYANN = "PAYANN"  # Annual payroll
+PAYPEREMP = "PAYPEREMP" # Pay per employee
 
 # 2014 race groups
 ASECB = "ASECB"
@@ -22,6 +23,11 @@ ASECB_TTL = "ASECB_TTL"
 # 2012 race groups
 CBGROUP = "CBGROUP"
 CBGROUP_TTL = "CBGROUP_TTL"
+
+# Variable codes
+ALL_FIRMS = "0000"
+ALL_FIRMS_CLASSIFIABLE = "9996"
+ALL_FIRMS_NOT_CLASSIFIABLE = "9998"
 
 # Standard column names
 GROUP = "GROUP"
@@ -157,6 +163,17 @@ def get_census_dataframe(census_data, year):
     # Convert the column types
     df_census = df_census.astype(vars_to_convert)
 
+    # Drop rows that includes aggregate groups because the values are too large
+    # and disrupt the plotting
+    df_census = df_census[(df_census[GROUP] != ALL_FIRMS) &
+                          (df_census[GROUP] != ALL_FIRMS_CLASSIFIABLE) &
+                          (df_census[GROUP] != ALL_FIRMS_NOT_CLASSIFIABLE)
+                          ]
+    df_census = add_columns_to_business_df(df_census)
+
+    # Drop the PAYANN column because its values are too large to plot
+    df_census = df_census.drop(columns=[PAYANN], errors="ignore")
+
     return df_census
 
 
@@ -166,9 +183,10 @@ def add_columns_to_business_df(df):
     :param df:
     :return:
     """
-    pay_per_emp = df["PAYANN"] / df["EMP"]
-    # Add new columns via assign()
-    df = df.assign(PAYPEREMP=pay_per_emp)
+    if PAYANN in df.columns:
+        pay_per_emp = df[PAYANN] / df[EMP]
+        # Add new columns via assign()
+        df = df.assign(PAYPEREMP=pay_per_emp)
     return df
 
 
@@ -179,12 +197,22 @@ def get_census_data(census_vars):
     :return:
     """
 
+    # If only 1 variable was provided, then it is a string; place it inside
+    # a list
     if type(census_vars) == str:
+        # Users can chosoe the "PAYPEREMP" variable, but it needs to be
+        # determined manually and cannot be queried. Query for "PAYANN"
+        # and use PAYANN / EMP to get PAYPEREMP.
+        if census_vars == PAYPEREMP:
+            census_vars = PAYANN
         census_vars = [census_vars]
+
+
 
     year_2014 = 2014
     bus_2014 = get_business_data(year_2014, census_vars)
     df_bus_2014 = get_census_dataframe(bus_2014, year_2014)
+    # print(df_bus_2014)
 
     """
     Fix 2012 code once done with 2014
@@ -199,13 +227,16 @@ def get_census_data(census_vars):
 
 if __name__ == "__main__":
     census_vars = [
-        PAYANN,
+        PAYPEREMP,
     ]
-    get_census_data(census_vars)
+    get_census_data("FIRMPDEMP")
 
-    with open(
+    """
+        with open(
             "C:\\Users\\Andrew\\Desktop\\summer-projects\\census_backend\\react.txt",
             "w+") as f:
         f.write(str(census_vars))
+    """
+
 
 
