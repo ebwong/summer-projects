@@ -1,12 +1,16 @@
-"""
-Includes method for visualizing the census data
-"""
-import matplotlib as mpl
+# Plots the census data using matplotlib. Not currently used
 import matplotlib.pyplot as plt
 from cycler import cycler
 
 
 def plot_business_data(xvar, yvar, df):
+    """
+    Plots the data from the given DataFrame
+    :param xvar: the variable to plot on the x-axis
+    :param yvar: the variable to plot on the y-axis
+    :param df: the given DataFrame
+    :return: a path to a saved image file of the graph
+    """
 
     demographic_category_key = "GROUP"
     xlabel = xvar

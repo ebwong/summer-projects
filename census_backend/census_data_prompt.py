@@ -1,3 +1,5 @@
+# Command-line prompting for users to interact with the data set.
+# Not currently used
 def prompt_user():
     welcome_msg = "Welcome to a tool for investigating data from the 2014 " \
                   "ASE. Choose two different variables from the list below(" \

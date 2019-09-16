@@ -1,21 +1,40 @@
-#title {
-	font-family: "Century", "Times New Roman";
+#main-page-title {
+	font-family: "Helvetica", "Arial" ;
+	font-weight: lighter;
 	text-align: center;
+	text-transform: none;
 }
 
 #data-sets {
-	font-family: "Century", "Times New Roman";
+	font-family: "Helvetica", "Arial";
 	text-align: center;
+}
+
+#data-2014 {
+	text-decoration: none;
+}
+
+.var-label {
+	font-family: "Helvetica", "Arial";
 }
 
 #option-form {
 	text-align: center;
 }
 
-#chart-title {
-	text-align: center;
+#submit-vars {
+	margin-top: 10px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+	margin-left: 10px;
+
+	padding-top: 5px;
+	padding-right: 5px;
+	padding-bottom: 5px;
+	padding-left: 5px;
 }
 
-#loading {
+#chart-title {
+	font-family: "Helvetica", "Arial" ;
 	text-align: center;
 }

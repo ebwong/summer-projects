@@ -12,15 +12,24 @@ VALID_YEARS = [
     2012,
     2014,
 ]
-EMP = "EMP"  # Employee count
-PAYANN = "PAYANN"  # Annual payroll
-PAYPEREMP = "PAYPEREMP" # Pay per employee
 
-# 2014 race groups
+# 2014 variables
+
+EMP = "EMP"  # Employee count
+FIRMPDEMP = "FIRMPDEMP"  # Number of firms
+PAYANN = "PAYANN"  # Annual payroll
+
+US_GEO = "us"
+
+# Custom variables
+PAYPEREMP = "PAYPEREMP" # Pay per employee
+EMPPERFIRM = "EMPPERFIRM"  # Employees per firm
+
+# 2014 social groups
 ASECB = "ASECB"
 ASECB_TTL = "ASECB_TTL"
 
-# 2012 race groups
+# 2012 social groups
 CBGROUP = "CBGROUP"
 CBGROUP_TTL = "CBGROUP_TTL"
 
@@ -40,7 +49,7 @@ SUFFIXES = [
 ]
 
 
-def get_business_data(year, census_vars):
+def get_business_data(year, independent_var, dependent_var):
     """
     :param year: The year to query the data for
     :return: Census Business data as a list of JSON objects
@@ -50,25 +59,25 @@ def get_business_data(year, census_vars):
     business_vars = None
     if year == 2014:
         business_url = "https://api.census.gov/data/2014/ase/cscb"
-        # EMP should always be included
         business_vars = [
             ASECB,
             ASECB_TTL,
-            EMP,
+        ] + [
+            independent_var,
+            dependent_var,
         ]
-
-        # Append the list of variables to the total list
-        business_vars = business_vars + census_vars
+        # Ensure that "EMP" is queried for if it is needed for another category
+        if dependent_var in [FIRMPDEMP, PAYANN]:
+            business_vars.append(EMP)
     elif year == 2012:
         business_url = "https://api.census.gov/data/2012/sbo/cscb"
-        # EMP should always be included
         business_vars = [
             CBGROUP,
             CBGROUP_TTL,
-            EMP,
+        ] + [
+            independent_var,
+            dependent_var,
         ]
-        # Append the list of variables to the total list
-        business_vars = business_vars + census_vars
     else:
         raise ValueError(f"Given year is not one of {VALID_YEARS}")
 
@@ -110,16 +119,19 @@ def query_census(url, census_vars, api_key=None):
 
     response = requests.get(url, params=params)
     if not response.ok:
-        raise requests.exceptions.HTTPError(response.text)
+        if response.status_code == 204:
+            raise requests.exceptions.HTTPError("Query didn't return anything")
+        else:
+            raise requests.exceptions.HTTPError(response.text)
     return response.json()
 
 
-def get_census_dataframe(census_data, year):
+def get_census_dataframe(year, census_data, independent_var, dependent_var):
     """
     Creates a Pandas DataFrame from the given data, removes specified columns,
     and makes sure numeric data are converted to numbers
-    :param census_data: the given census data
     :param year: the year of the data
+    :param census_data: the given census data
     :param columns_to_drop: columns to omit from the returned DataFrame
     :return: census data as a Pandas DataFrame
     """
@@ -135,10 +147,6 @@ def get_census_dataframe(census_data, year):
             dict(zip(census_data_labels, census_data[i]))))
     df_census = pd.DataFrame(census_data_as_list_of_dicts)
 
-    # Drop unwanted columns
-    columns_to_drop = ["us"]
-    df_census = df_census.drop(columns=columns_to_drop, errors="ignore")
-
     # Format the DataFrame to make it have the same column names across years
     columns_to_rename = None
     if year == 2014:
@@ -153,26 +161,45 @@ def get_census_dataframe(census_data, year):
         }
     df_census = df_census.rename(columns=columns_to_rename)
 
+
+
     # Convert integer types that are currently treated as strings
-    vars_to_convert = {
-        EMP: np.int64,
-    }
-    # Verify that a column exists before trying to convert the type
+    vars_to_convert = {}
+    # Verify that a column exists for the variable
+    # before trying to convert the type
+    if EMP in df_census.columns:
+        vars_to_convert[EMP] = np.int64
     if PAYANN in df_census.columns:
         vars_to_convert[PAYANN] = np.int64
+    if FIRMPDEMP in df_census.columns:
+        vars_to_convert[FIRMPDEMP] = np.int64
     # Convert the column types
     df_census = df_census.astype(vars_to_convert)
 
-    # Drop rows that includes aggregate groups because the values are too large
+    # Drop rows that include aggregate groups because the values are too large
     # and disrupt the plotting
+
     df_census = df_census[(df_census[GROUP] != ALL_FIRMS) &
                           (df_census[GROUP] != ALL_FIRMS_CLASSIFIABLE) &
                           (df_census[GROUP] != ALL_FIRMS_NOT_CLASSIFIABLE)
                           ]
+
+    # Add in custom columns that better summarize the data
     df_census = add_columns_to_business_df(df_census)
 
-    # Drop the PAYANN column because its values are too large to plot
-    df_census = df_census.drop(columns=[PAYANN], errors="ignore")
+    # Drop unwanted columns or columns whose values are too large to easily plot
+    columns_to_drop = [
+        FIRMPDEMP,
+        PAYANN,
+        US_GEO,
+    ]
+
+    # If EMP is not one of the variables to graphed but it is in the
+    # table, remove it
+    if EMP not in [independent_var, dependent_var] and EMP in df_census.columns:
+        columns_to_drop.append(EMP)
+
+    df_census = df_census.drop(columns=columns_to_drop, errors="ignore")
 
     return df_census
 
@@ -187,32 +214,30 @@ def add_columns_to_business_df(df):
         pay_per_emp = df[PAYANN] / df[EMP]
         # Add new columns via assign()
         df = df.assign(PAYPEREMP=pay_per_emp)
+    if FIRMPDEMP in df.columns:
+        emp_per_firm = df[EMP] / df[FIRMPDEMP]
+        df = df.assign(EMPPERFIRM=emp_per_firm)
     return df
 
 
-def get_census_data(census_vars):
+def get_census_data(independent_var, dependent_var):
     """
     Returns a dict containing the data for the requested variables in a table format
     :param census_vars: the chosen variable
     :return:
     """
 
-    # If only 1 variable was provided, then it is a string; place it inside
-    # a list
-    if type(census_vars) == str:
-        # Users can chosoe the "PAYPEREMP" variable, but it needs to be
-        # determined manually and cannot be queried. Query for "PAYANN"
-        # and use PAYANN / EMP to get PAYPEREMP.
-        if census_vars == PAYPEREMP:
-            census_vars = PAYANN
-        census_vars = [census_vars]
-
-
+    # Adjust the names of the variables for querying
+    if dependent_var == PAYPEREMP:
+        dependent_var = PAYANN
+    elif dependent_var == EMPPERFIRM:
+        dependent_var = FIRMPDEMP
 
     year_2014 = 2014
-    bus_2014 = get_business_data(year_2014, census_vars)
-    df_bus_2014 = get_census_dataframe(bus_2014, year_2014)
-    # print(df_bus_2014)
+    bus_2014 = get_business_data(year_2014, independent_var, dependent_var)
+    # print(bus_2014)
+    df_bus_2014 = get_census_dataframe(year_2014, bus_2014, independent_var, dependent_var)
+    print(df_bus_2014)
 
     """
     Fix 2012 code once done with 2014
@@ -226,10 +251,9 @@ def get_census_data(census_vars):
     return df_bus_2014.to_json()
 
 if __name__ == "__main__":
-    census_vars = [
-        PAYPEREMP,
-    ]
-    get_census_data("FIRMPDEMP")
+    independent_var = "YIBSZFI"
+    dependent_var = PAYPEREMP
+    get_census_data(independent_var, dependent_var)
 
     """
         with open(

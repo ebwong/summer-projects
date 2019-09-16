@@ -1,6 +1,7 @@
-"""
-Includes methods for formatting the census data
-"""
+# Includes methods for formatting the census data. Not currently used
+
+import numpy as np
+
 
 def get_columns_to_rename():
     """
